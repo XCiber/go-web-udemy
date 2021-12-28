@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/XCiber/go-web-udemy/pkg/config"
+	"github.com/XCiber/go-web-udemy/pkg/models"
 	"github.com/XCiber/go-web-udemy/pkg/render"
 	"net/http"
 )
@@ -24,10 +25,17 @@ func NewHandlers(r *Repository) {
 
 // Home is the home page handler
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "home.page.tmpl")
+	render.RenderTemplate(w, "home.page.tmpl", &models.TemplateData{})
 }
 
 // About is the about page handler
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "about.page.tmpl")
+	// perform some business logic
+	stringMap := make(map[string]string)
+	stringMap["test"] = "Hello, again."
+
+	// send the data to the template
+	render.RenderTemplate(w, "about.page.tmpl", &models.TemplateData{
+		StringMap: stringMap,
+	})
 }

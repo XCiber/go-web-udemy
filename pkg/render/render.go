@@ -3,6 +3,7 @@ package render
 import (
 	"bytes"
 	"github.com/XCiber/go-web-udemy/pkg/config"
+	"github.com/XCiber/go-web-udemy/pkg/models"
 	"html/template"
 	"log"
 	"net/http"
@@ -17,8 +18,13 @@ func NewTemplate(a *config.AppConfig) {
 	app = a
 }
 
+// AddDefaultData add default data to any template
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+	return td
+}
+
 // RenderTemplate renders templates from "templates" directory
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 
 	var tc map[string]*template.Template
 
@@ -34,7 +40,10 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 	}
 
 	buf := new(bytes.Buffer)
-	_ = t.Execute(buf, nil)
+
+	td = AddDefaultData(td)
+
+	_ = t.Execute(buf, td)
 	_, err := buf.WriteTo(w)
 	if err != nil {
 		log.Printf("error parsing template: %v", err)
