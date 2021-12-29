@@ -7,6 +7,9 @@ import (
 	"github.com/XCiber/go-web-udemy/pkg/render"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 const port = 8080
@@ -30,13 +33,19 @@ func main() {
 
 	log.Printf("Starting app server on port %d", port)
 
-	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
-		Handler: routes(&app),
-	}
-	err = srv.ListenAndServe()
-	if err != nil {
-		log.Fatalf("Could not start server on port %d: %v", port, err)
-	}
+	go func() {
+		srv := &http.Server{
+			Addr:    fmt.Sprintf(":%d", port),
+			Handler: routes(&app),
+		}
+		err = srv.ListenAndServe()
+		if err != nil {
+			log.Fatalf("Could not start server on port %d: %v", port, err)
+		}
+	}()
 
+	// Wait until some signal is captured.
+	sigC := make(chan os.Signal, 1)
+	signal.Notify(sigC, syscall.SIGTERM, syscall.SIGINT)
+	<-sigC
 }
