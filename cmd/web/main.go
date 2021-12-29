@@ -15,24 +15,26 @@ const port = 8080
 func main() {
 
 	var app config.AppConfig
+	app.UseCache = true
 
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
 		log.Fatalf("Can't get templates cache: %v", err)
 	}
 	app.TemplateCache = tc
-	app.UseCache = false
 
 	repo := handlers.NewRepo(&app)
 	handlers.NewHandlers(repo)
 
 	render.NewTemplate(&app)
 
-	http.HandleFunc("/", handlers.Repo.Home)
-	http.HandleFunc("/about", handlers.Repo.About)
-
 	log.Printf("Starting app server on port %d", port)
-	err = http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: routes(&app),
+	}
+	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatalf("Could not start server on port %d: %v", port, err)
 	}
